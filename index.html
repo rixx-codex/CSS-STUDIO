@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0d0d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Zan Studio</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Shared Navigation CSS -->
+  <link rel="stylesheet" href="navigation.css" />
+
+  <style>
+    /* ================================================
+       MAIN PAGE STYLES
+       ================================================ */
+    
+    /* Preloader Styles - Simple Static */
+    .preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0d0d0d;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .preloader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #00ffe1;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0d0d0d;
+      background-image: linear-gradient(135deg, #1a1a1a, #000000);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Main Content Area */
+    #main-content {
+      padding-top: var(--nav-height);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: calc(100vh - var(--nav-height));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      margin: 20px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+      transition: all 0.5s ease;
+      animation: fadeInUp 1s ease 0.5s forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      margin-bottom: 1rem;
+      color: #00ffe1;
+      animation: fadeIn 1s ease 0.7s forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      color: #ccc;
+      line-height: 1.7;
+      animation: fadeIn 1s ease 0.9s forwards;
+      opacity: 0;
+    }
+
+    .cta-btn {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      background: rgba(0,255,225,0.2);
+      color: #fff;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      animation: fadeIn 1s ease 1.1s forwards, float 3s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .cta-btn:hover {
+      background: rgba(0,255,225,0.3);
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0, 255, 225, 0.4);
+    }
+
+    .cta-btn:active {
+      transform: scale(1.02);
+    }
+
+    /* Footer */
+    footer {
+      padding: 2rem;
+      text-align: center;
+      background: rgba(20,20,20,0.4);
+      backdrop-filter: blur(10px);
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #888;
+      animation: fadeIn 1s ease 1.3s forwards;
+      opacity: 0;
+    }
+
+    /* Scroll reveal animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease;
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Floating Customer Service */
+    .floating-cs {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9999;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .floating-cs-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00ffe1, #00d4aa);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 30px rgba(0, 255, 225, 0.4);
+      transition: all 0.3s ease;
+      animation: floatBtn 3s ease-in-out infinite;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .floating-cs-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 40px rgba(0, 255, 225, 0.6);
+    }
+
+    .floating-cs-btn:active {
+      transform: scale(1.05);
+    }
+
+    .floating-cs-btn svg {
+      width: 28px;
+      height: 28px;
+      fill: #0d0d0d;
+    }
+
+    @keyframes floatBtn {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .cs-tooltip {
+      position: absolute;
+      right: 70px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1a1a1a;
+      color: #00ffe1;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .cs-tooltip::before {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 8px solid transparent;
+      border-left-color: #1a1a1a;
+    }
+
+    .floating-cs:hover .cs-tooltip,
+    .floating-cs:focus-within .cs-tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .cs-notification {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 16px;
+      height: 16px;
+      background: #ff5f56;
+      border-radius: 50%;
+      border: 2px solid #0d0d0d;
+      animation: pulseNotif 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseNotif {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 767px) {
+      .hero {
+        margin: 10px;
+        padding: 1.5rem;
+        border-radius: 16px;
+      }
+
+      .floating-cs {
+        bottom: 20px;
+        right: 20px;
+      }
+
+      .floating-cs-btn {
+        width: 52px;
+        height: 52px;
+      }
+
+      .cs-tooltip {
+        display: none; /* Hide tooltip on mobile, not practical */
+      }
+    }
+
+    /* Tablet adjustments */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .hero {
+        margin: 30px;
+        padding: 3rem;
+      }
+    }
+
+    /* Desktop large */
+    @media (min-width: 1280px) {
+      .hero {
+        max-width: 900px;
+        margin: 40px auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div class="preloader" id="preloader">
+    <div class="loader-text">Zan Studio</div>
+  </div>
+
+  <!-- Floating Customer Service -->
+  <div class="floating-cs">
+    <div class="cs-tooltip">Need help? Chat with us!</div>
+    <button class="floating-cs-btn" aria-label="Contact Customer Service">
+      <svg viewBox="0 0 24 24">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+      </svg>
+      <div class="cs-notification"></div>
+    </button>
+  </div>
+
+  <!-- Navigation -->
+  <nav role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="logo" aria-label="Zan Studio Home">ZAN STUDIO</a>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-drawer">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <!-- Mobile Navigation Overlay -->
+    <div class="nav-overlay" id="navOverlay"></div>
+    
+    <!-- Mobile Navigation Drawer -->
+    <div class="nav-drawer" id="navDrawer" role="dialog" aria-label="Mobile navigation menu">
+      <button class="nav-close-btn" id="navCloseBtn" aria-label="Close menu">
+        <i class="ph ph-x"></i>
+      </button>
+      <div class="nav-drawer-links">
+        <a href="index.html" class="nav-drawer-link active" aria-current="page">
+          <i class="ph ph-house"></i>
+          <span>Home</span>
+        </a>
+        <a href="services.html" class="nav-drawer-link">
+          <i class="ph ph-stack"></i>
+          <span>Services</span>
+        </a>
+        <a href="about.html" class="nav-drawer-link">
+          <i class="ph ph-info"></i>
+          <span>About</span>
+        </a>
+        <a href="contacts.html" class="nav-drawer-link">
+          <i class="ph ph-envelope"></i>
+          <span>Contact</span>
+        </a>
+      </div>
+      
+      <div class="nav-drawer-actions">
+        <a href="portal.html" class="nav-action-btn primary">
+          <i class="ph ph-login"></i>
+          <span>Portal Login</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Desktop Navigation Links -->
+    <div class="nav-links" role="menubar">
+      <a href="index.html" class="nav-link active" role="menuitem" aria-current="page">
+        Home
+      </a>
+      <a href="services.html" class="nav-link" role="menuitem">
+        Services
+      </a>
+      <a href="about.html" class="nav-link" role="menuitem">
+        About
+      </a>
+      <a href="contacts.html" class="nav-link" role="menuitem">
+        Contact
+      </a>
+    </div>
+    
+    <!-- Desktop CTA Button -->
+    <a href="portal.html" class="nav-cta">
+      <i class="ph ph-login"></i>
+      <span>Portal</span>
+    </a>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main-content">
+    <section class="hero reveal">
+      <h1>Welcome to Zan Dev Studio</h1>
+      <p>For the successful submission of your projects, we offer innovative designs, professional solutions, and modern aesthetics. Let's create something remarkable together.</p>
+      <a href="portal.html" class="cta-btn">Get Started</a>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 Zan Studio. All rights reserved.</p>
+  </footer>
+
+  <!-- Shared Navigation JavaScript -->
+  <script src="navigation.js"></script>
+
+  <script>
+    // Preloader functionality
+    window.addEventListener('load', () => {
+      const preloader = document.getElementById('preloader');
+      setTimeout(() => {
+        preloader.classList.add('fade-out');
+        setTimeout(() => {
+          preloader.style.display = 'none';
+        }, 500);
+      }, 1000);
+    });
+
+    // Floating Customer Service Click Handler
+    const floatingCsBtn = document.querySelector('.floating-cs-btn');
+    floatingCsBtn.addEventListener('click', () => {
+      window.open('https://www.facebook.com/mrixxcarti', '_blank');
+    });
+
+    floatingCsBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      window.open('https://www.facebook.com/mrixxcarti', '_blank');
+    });
+
+    // Scroll reveal animations
+    const reveals = document.querySelectorAll('.reveal');
+    
+    function revealOnScroll() {
+      const windowHeight = window.innerHeight;
+      const revealPoint = 150;
+      
+      reveals.forEach((reveal) => {
+        const revealTop = reveal.getBoundingClientRect().top;
+        
+        if (revealTop < windowHeight - revealPoint) {
+          reveal.classList.add('active');
+        }
+      });
+    }
+    
+    window.addEventListener('scroll', revealOnScroll, { passive: true });
+    revealOnScroll(); // Check on load
+  </script>
+
+</body>
+</html>
+
+
+
+
+

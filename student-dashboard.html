@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="portal.css">
+    <title>Dashboard | DNHS PORTAL</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0b1120;
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        html, body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #020617;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Page load animations */
+        @keyframes pageLoad {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes rotateGradient {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes skeletonLoading {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .page-wrapper {
+            animation: pageLoad 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .slide-in-left {
+            animation: slideInLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+        .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+        .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+        .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+        
+        /* RGB Border animation */
+        .rgb-border {
+            position: relative;
+            padding: 2px;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            z-index: 1;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .rgb-border:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+        
+        .rgb-border::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, #6366f1, #8b5cf6, #a855f7, #c084fc, #6366f1);
+            animation: rotateGradient 8s linear infinite;
+            z-index: -2;
+            opacity: 0.8;
+        }
+        
+        .rgb-border::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: linear-gradient(145deg, #0b1120, #0f172a);
+            border-radius: 1.4rem;
+            z-index: -1;
+        }
+        
+        /* Glass morphism cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Material card styles */
+        .material-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .material-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .material-card:hover::before {
+            left: 100%;
+        }
+        
+        .material-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .material-card:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+        
+        /* File type icons */
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .material-card:hover .file-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .file-ppt { background: linear-gradient(135deg, #f97316, #fb923c); }
+        .file-doc { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .file-pdf { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .file-zip { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+        .file-default { background: linear-gradient(135deg, #6366f1, #818cf8); }
+        
+        /* New badge animation */
+        .new-badge {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Button styles */
+        .btn-cyber {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .btn-cyber::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+        
+        .btn-cyber:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-cyber:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-cyber:active {
+            transform: translateY(0);
+        }
+        
+        .btn-cyber:disabled {
+            background: #1e293b !important;
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Project folder cards */
+        .folder-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .folder-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+        
+        .folder-card:active {
+            transform: translateY(-4px) scale(0.98);
+        }
+        
+        .folder-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .folder-card:hover .folder-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+        
+        /* Portal status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+        }
+        
+        .status-badge.open {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .status-badge.closed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .status-badge.open .status-dot {
+            background: #10b981;
+        }
+        
+        .status-badge.closed .status-dot {
+            background: #ef4444;
+        }
+        
+        /* Log entries */
+        .log-entry {
+            animation: fadeIn 0.4s ease forwards;
+            opacity: 0;
+        }
+        
+        .log-entry:nth-child(1) { animation-delay: 0.05s; }
+        .log-entry:nth-child(2) { animation-delay: 0.1s; }
+        .log-entry:nth-child(3) { animation-delay: 0.15s; }
+        .log-entry:nth-child(4) { animation-delay: 0.2s; }
+        .log-entry:nth-child(5) { animation-delay: 0.25s; }
+        
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: linear-gradient(145deg, #0b1120, #0f172a);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+        
+        /* Form inputs */
+        .form-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 0.875rem 1rem;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .form-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+        }
+        
+        /* File upload */
+        .file-upload {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload:hover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .file-upload.dragover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .toast {
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(8px);
+            border-radius: 0.75rem;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+        
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .toast.warning {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #334155;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .empty-state p {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .material-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .folder-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+            
+            .glass-card {
+                -webkit-backdrop-filter: blur(24px);
+                backdrop-filter: blur(24px);
+            }
+            
+            .modal-overlay {
+                -webkit-backdrop-filter: blur(8px);
+                backdrop-filter: blur(8px);
+            }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #020617;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #4f46e5, #8b5cf6);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #6366f1, #a855f7);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6 lg:p-8 page-wrapper">
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="container mx-auto max-w-5xl">
+        <!-- Header -->
+        <header class="mb-8 slide-in-left">
+            <div class="rgb-border">
+                <div class="p-6 flex flex-col sm:flex-row justify-between items-center bg-[#0b1120]/95 rounded-[1.4rem] gap-6">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/30">
+                            <i class="fas fa-user-shield text-xl text-indigo-400"></i>
+                        </div>
+                        <div>
+                            <h1 id="welcomeUser" class="text-lg md:text-xl font-black text-white uppercase italic tracking-tighter">STUDENT</h1>
+                            <p class="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">
+                                <i class="fas fa-clock mr-1"></i>DEADLINE: 
+                                <span id="deadlineTimer" class="text-indigo-400 italic font-bold uppercase tracking-tight">FETCHING...</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                        <span id="portalStatusBadge" class="status-badge open">
+                            <span class="status-dot"></span>
+                            Portal Open
+                        </span>
+                        <button onclick="logout()" class="text-[10px] font-bold text-slate-500 hover:text-white uppercase tracking-widest transition-all px-3 py-1">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Log Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Learning Materials Section -->
+        <section class="mb-10 fade-in stagger-1">
+            <h2 class="text-[9px] md:text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-4 px-2 flex items-center gap-2">
+                <i class="fas fa-broadcast-tower animate-pulse"></i> Learning Materials
+                <span class="new-badge bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full text-[9px] ml-2">NEW</span>
+            </h2>
+            <div id="materialList" class="grid grid-cols-1 md:grid-cols-2 gap-4 material-grid">
+                <!-- Materials will be loaded here -->
+            </div>
+        </section>
+        
+        <!-- Project Folders -->
+        <section class="mb-10 fade-in stagger-2">
+            <h2 class="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-6 px-2">
+                <i class="fas fa-folder-open mr-2"></i>Project Submission
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 folder-grid">
+                <!-- Project Folder 1 -->
+                <div class="folder-card glass-card p-8 rounded-[2rem] text-center border border-white/5">
+                    <div class="folder-icon w-20 h-20 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
+                        <i class="fas fa-folder text-4xl text-yellow-500"></i>
+                    </div>
+                    <h3 class="text-white font-black uppercase text-sm italic tracking-widest">Project Folder 1</h3>
+                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-6 italic">Submit your first project here</p>
+                    <button id="btn-p1" onclick="openUploadModal('Project 1')" class="btn-cyber w-full py-4 rounded-xl text-white font-bold uppercase text-xs tracking-widest transition-all">
+                        <i class="fas fa-paperclip mr-2"></i>Attach File
+                    </button>
+                </div>
+                
+                <!-- Project Folder 2 -->
+                <div class="folder-card glass-card p-8 rounded-[2rem] text-center border border-white/5">
+                    <div class="folder-icon w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
+                        <i class="fas fa-folder-open text-4xl text-blue-500"></i>
+                    </div>
+                    <h3 class="text-white font-black uppercase text-sm italic tracking-widest">Project Folder 2</h3>
+                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-6 italic">Submit your second project here</p>
+                    <button id="btn-p2" onclick="openUploadModal('Project 2')" class="btn-cyber w-full py-4 rounded-xl text-white font-bold uppercase text-xs tracking-widest transition-all">
+                        <i class="fas fa-paperclip mr-2"></i>Attach File
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Transmission Logs -->
+        <section class="fade-in stagger-3">
+            <h2 class="text-[9px] md:text-[10px] font-black text-slate-600 uppercase tracking-[0.4em] mb-4 px-2">
+                <i class="fas fa-history mr-2"></i>Transmission Logs
+            </h2>
+            <div id="projectList" class="space-y-3 pb-10">
+                <!-- Logs will be loaded here -->
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="text-center pb-8 fade-in stagger-4">
+            <p class="text-[10px] text-slate-600 uppercase tracking-widest">
+                <i class="fas fa-shield-alt mr-2"></i>Student Terminal
+            </p>
+        </footer>
+    </div>
+    
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal-overlay">
+        <div class="modal-content rgb-border">
+            <div class="relative z-10">
+                <button onclick="closeModal()" class="absolute top-0 right-0 text-slate-500 hover:text-white transition-all p-2">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+                
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-indigo-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-indigo-400"></i>
+                    </div>
+                    <h2 id="modalTitle" class="text-xl font-black text-white uppercase italic tracking-tight">
+                        Upload <span class="text-indigo-500">Project</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1 uppercase tracking-widest">Submit your project file</p>
+                </div>
+                
+                <form id="fileUploadForm" class="space-y-4">
+                    <input type="file" id="projectFile" class="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar">
+                    <label for="projectFile" class="file-upload" id="fileUploadLabel">
+                        <i class="fas fa-cloud-arrow-up text-3xl text-indigo-500 mb-3 transition-transform" id="uploadIcon"></i>
+                        <p id="fileNameDisplay" class="text-xs font-black text-slate-500 uppercase tracking-widest">Select Project File (PDF, DOCX, PPT, ZIP)</p>
+                        <p class="text-[10px] text-slate-600 mt-2">Drag & drop or click to browse</p>
+                    </label>
+                    
+                    <button type="submit" id="submitBtn" class="w-full btn-cyber py-4 rounded-xl text-white font-bold uppercase text-sm tracking-widest">
+                        <i class="fas fa-paper-plane mr-2"></i>Submit Project
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Supabase configuration
+        const SB_URL = 'https://idogseqqmarwtmfouxzb.supabase.co';
+        const SB_KEY = 'sb_publishable_2AoaiMV6mUFjqKtKr-1sfg_BEt-9MH_';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        
+        // State
+        let portalOpen = true;
+        let materialsLastFetch = null;
+        
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Get file type icon
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'ppt': '<i class="fas fa-file-powerpoint text-white text-xl"></i>',
+                'pptx': '<i class="fas fa-file-powerpoint text-white text-xl"></i>',
+                'doc': '<i class="fas fa-file-word text-white text-xl"></i>',
+                'docx': '<i class="fas fa-file-word text-white text-xl"></i>',
+                'pdf': '<i class="fas fa-file-pdf text-white text-xl"></i>',
+                'zip': '<i class="fas fa-file-archive text-white text-xl"></i>',
+                'rar': '<i class="fas fa-file-archive text-white text-xl"></i>'
+            };
+            return icons[ext] || '<i class="fas fa-file text-white text-xl"></i>';
+        }
+        
+        // Get file type class
+        function getFileClass(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const classes = {
+                'ppt': 'file-ppt',
+                'pptx': 'file-ppt',
+                'doc': 'file-doc',
+                'docx': 'file-doc',
+                'pdf': 'file-pdf',
+                'zip': 'file-zip',
+                'rar': 'file-zip'
+            };
+            return classes[ext] || 'file-default';
+        }
+        
+        // Load materials from admin
+        async function loadMaterials() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('admin_materials')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const matArea = document.getElementById('materialList');
+                
+                // Check if materials changed
+                const dataHash = JSON.stringify(data);
+                if (dataHash === materialsLastFetch) return;
+                materialsLastFetch = dataHash;
+                
+                if (data && data.length > 0) {
+                    matArea.innerHTML = data.map((m, index) => {
+                        const fileName = m.file_link.split('/').pop();
+                        const fileTypeClass = getFileClass(fileName);
+                        const fileIcon = getFileIcon(fileName);
+                        const isNew = index === 0 && (Date.now() - new Date(m.created_at).getTime()) < 60000;
+                        
+                        return `
+                            <div class="material-card glass-card p-4 rounded-2xl flex justify-between items-center border border-indigo-500/20 bg-indigo-500/5 stagger-${(index % 4) + 1}" style="animation-delay: ${index * 0.1}s">
+                                <div class="flex items-center gap-4 min-w-0 flex-1">
+                                    <div class="file-icon ${fileTypeClass} flex-shrink-0">
+                                        ${fileIcon}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-xs font-bold text-white uppercase italic tracking-widest truncate">${m.title}</p>
+                                            ${isNew ? '<span class="new-badge bg-indigo-500 text-white px-2 py-0.5 rounded-full text-[9px]">NEW</span>' : ''}
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 font-semibold uppercase mt-0.5">${fileName}</p>
+                                    </div>
+                                </div>
+                                <a href="${m.file_link}" download target="_blank" 
+                                    class="btn-cyber flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ml-4">
+                                    <i class="fas fa-download mr-1"></i>Download
+                                </a>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    matArea.innerHTML = `
+                        <div class="glass-card p-8 rounded-2xl border border-white/5 col-span-full">
+                            <div class="empty-state">
+                                <i class="fas fa-broadcast-tower"></i>
+                                <p class="text-[10px] font-bold text-slate-600 uppercase italic">Waiting for broadcast...</p>
+                                <p class="text-xs text-slate-500 mt-2">Your teacher will upload materials here</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.error('Materials Load Error:', e);
+            }
+        }
+        
+        // Check deadline
+        async function checkDeadline() {
+            try {
+                const { data } = await supabaseClient.from('portal_settings').select('*').eq('key', 'global_deadline').single();
+                
+                if (data) {
+                    const deadline = new Date(data.value);
+                    const now = new Date();
+                    
+                    document.getElementById('deadlineTimer').innerText = deadline.toLocaleString('en-US', { 
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    });
+                    
+                    const badge = document.getElementById('portalStatusBadge');
+                    
+                    if (now > deadline) {
+                        portalOpen = false;
+                        badge.className = 'status-badge closed';
+                        badge.innerHTML = '<span class="status-dot"></span>Portal Closed';
+                        document.getElementById('btn-p1').disabled = true;
+                        document.getElementById('btn-p2').disabled = true;
+                        document.getElementById('btn-p1').innerHTML = '<i class="fas fa-lock mr-2"></i>LOCKED';
+                        document.getElementById('btn-p2').innerHTML = '<i class="fas fa-lock mr-2"></i>LOCKED';
+                    } else {
+                        portalOpen = true;
+                        badge.className = 'status-badge open';
+                        badge.innerHTML = '<span class="status-dot"></span>Portal Open';
+                        document.getElementById('btn-p1').disabled = false;
+                        document.getElementById('btn-p2').disabled = false;
+                        document.getElementById('btn-p1').innerHTML = '<i class="fas fa-paperclip mr-2"></i>Attach File';
+                        document.getElementById('btn-p2').innerHTML = '<i class="fas fa-paperclip mr-2"></i>Attach File';
+                    }
+                }
+            } catch (e) {
+                console.log('Deadline Error:', e);
+            }
+        }
+        
+        // Load dashboard
+        async function loadDashboard() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) { 
+                    window.location.href = 'index.html'; 
+                    return; 
+                }
+                
+                const displayName = user.user_metadata.full_name || user.email;
+                document.getElementById('welcomeUser').innerText = displayName.toUpperCase();
+                
+                const { data: logs } = await supabaseClient
+                    .from('submissions')
+                    .select('*')
+                    .eq('student_name', displayName)
+                    .order('created_at', { ascending: false });
+                
+                const listArea = document.getElementById('projectList');
+                
+                if (logs && logs.length > 0) {
+                    listArea.innerHTML = logs.map(s => `
+                        <div class="log-entry glass-card p-4 rounded-xl flex justify-between items-center border border-white/5">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <i class="fas fa-file-code ${s.project_type === 'Project 1' ? 'text-yellow-500' : 'text-blue-500'} text-lg"></i>
+                                <div class="min-w-0">
+                                    <p class="text-xs text-white font-bold uppercase tracking-widest italic truncate">${s.project_type}</p>
+                                    <p class="text-[10px] font-semibold uppercase ${s.status === 'Approved' ? 'text-emerald-500' : (s.status === 'Rejected' ? 'text-red-500' : 'text-amber-500')} italic">
+                                        ${s.status || 'Pending'} ${s.grade ? `| Grade: ${s.grade}` : ''}
+                                    </p>
+                                    ${s.feedback ? `<p class="text-[10px] text-slate-400 mt-1 italic font-bold uppercase tracking-tight">Feedback: ${s.feedback}</p>` : ''}
+                                </div>
+                            </div>
+                            <a href="${s.submission_link}" target="_blank" 
+                                class="text-[10px] font-bold text-indigo-400 hover:text-white border border-indigo-400/30 hover:border-indigo-400 px-3 py-1.5 rounded-lg transition-all ml-2 flex-shrink-0">
+                                <i class="fas fa-external-link-alt mr-1"></i>Review
+                            </a>
+                        </div>
+                    `).join('');
+                } else {
+                    listArea.innerHTML = `
+                        <div class="glass-card p-8 rounded-xl border border-white/5">
+                            <div class="empty-state">
+                                <i class="fas fa-history"></i>
+                                <p class="text-[10px] font-bold text-slate-600 uppercase italic">No transmissions recorded</p>
+                                <p class="text-xs text-slate-500 mt-2">Submit your first project above</p>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                await checkDeadline();
+                await loadMaterials();
+                
+            } catch (e) {
+                console.error('Dashboard Error:', e);
+            }
+        }
+        
+        // Modal functions
+        let activeProject = '';
+        
+        function openUploadModal(p) { 
+            if (!portalOpen) {
+                showToast('Portal is closed', 'warning');
+                return;
+            }
+            activeProject = p; 
+            document.getElementById('modalTitle').innerHTML = `Upload <span class="text-indigo-500">${p}</span>`;
+            document.getElementById('uploadModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() { 
+            document.getElementById('uploadModal').classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('projectFile').value = '';
+            document.getElementById('fileNameDisplay').innerText = 'Select Project File (PDF, DOCX, PPT, ZIP)';
+            document.getElementById('uploadIcon').className = 'fas fa-cloud-arrow-up text-3xl text-indigo-500 mb-3 transition-transform';
+            document.getElementById('fileUploadLabel').style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            document.getElementById('fileUploadLabel').style.background = 'transparent';
+        }
+        
+        // File upload handling
+        document.getElementById('projectFile').onchange = function() { 
+            const fileName = this.files[0] ? this.files[0].name.toUpperCase() : 'Select Project File';
+            document.getElementById('fileNameDisplay').innerText = fileName;
+            
+            const label = document.getElementById('fileUploadLabel');
+            const icon = document.getElementById('uploadIcon');
+            
+            // Change icon based on file type
+            const file = this.files[0];
+            if (file) {
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (['ppt', 'pptx'].includes(ext)) {
+                    icon.className = 'fas fa-file-powerpoint text-3xl text-orange-500 mb-3 transition-transform';
+                } else if (['doc', 'docx'].includes(ext)) {
+                    icon.className = 'fas fa-file-word text-3xl text-blue-500 mb-3 transition-transform';
+                } else if (['pdf'].includes(ext)) {
+                    icon.className = 'fas fa-file-pdf text-3xl text-red-500 mb-3 transition-transform';
+                } else {
+                    icon.className = 'fas fa-file-archive text-3xl text-purple-500 mb-3 transition-transform';
+                }
+            }
+            
+            label.style.borderColor = '#6366f1';
+            label.style.background = 'rgba(99, 102, 241, 0.05)';
+        };
+        
+        // Form submit
+        document.getElementById('fileUploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('projectFile').files[0];
+            const btn = document.getElementById('submitBtn');
+            
+            if (!file) {
+                showToast('Please select a file', 'warning');
+                return;
+            }
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner mx-auto"></div>';
+            btn.disabled = true;
+            
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                const name = user.user_metadata.full_name || user.email;
+                
+                const path = `uploads/${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+                const { error: uploadError } = await supabaseClient.storage.from('projects').upload(path, file);
+                
+                if (uploadError) throw uploadError;
+                
+                const { data: { publicUrl } } = supabaseClient.storage.from('projects').getPublicUrl(path);
+                
+                const { error: insertError } = await supabaseClient.from('submissions').insert([{ 
+                    student_name: name, 
+                    project_type: activeProject, 
+                    submission_link: publicUrl, 
+                    status: 'Pending' 
+                }]);
+                
+                if (insertError) throw insertError;
+                
+                showToast('Project submitted successfully!');
+                closeModal();
+                loadDashboard();
+                
+            } catch (err) { 
+                console.error('Upload error:', err);
+                showToast('Upload failed: ' + err.message, 'error');
+            } finally { 
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+        
+        // Logout
+        function logout() {
+            supabaseClient.auth.signOut();
+            window.location.href = 'login-portal.html';
+        }
+        
+        // Close modal on escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+        
+        // Close modal on backdrop click
+        document.getElementById('uploadModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(() => {
+                checkDeadline();
+                loadMaterials();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
